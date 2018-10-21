@@ -1,8 +1,8 @@
-install.packages("tidyverse")
+#install.packages("tidyverse")
 library(tidyverse)
-install.packages("pdfetch")
+#install.packages("pdfetch")
 library(pdfetch)
-install.packages("quadprog")
+#install.packages("quadprog")
 library(quadprog)
 
 #Select and download 5 US stocks from separate indicies //financial/healthcare/services/tech/consumer goods
@@ -12,14 +12,18 @@ BA <- pdfetch_YAHOO("BA", from = "2013-01-01", to = "2018-10-14")
 AAPL <- pdfetch_YAHOO("AAPL", from = "2013-01-01", to = "2018-10-14")
 JNJ <- pdfetch_YAHOO("JNJ", from = "2013-01-01", to = "2018-10-14")
   
-#Or up to date?
-#GE_now <- pdfetch_YAHOO("GE",from = "2013-01-01")
-
-#Logdiff for yileds
-this_is_it <- data.frame ( diff ( log ( GE$GE.adjclose )) , diff ( log ( JPM$JPM.adjclose )) , diff ( log ( BA$BA.adjclose )) , diff ( log ( AAPL$AAPL.adjclose )) , diff ( log ( JNJ$JNJ.adjclose )))
+#Logdiff adjusted cloe for yileds
+rawFullData <- data.frame(
+  diff(log(GE$GE.adjclose)), 
+  diff(log(JPM$JPM.adjclose)), 
+  diff(log(BA$BA.adjclose)), 
+  diff(log(AAPL$AAPL.adjclose)), 
+  diff(log(JNJ$JNJ.adjclose)))
 
 #Drop the missing values
-returns <- drop_na(this_is_it)
+fullData <- drop_na(rawFullData)
+
+learningSize <- nrow(fullData)
 
 #Get the Covariance matrix of these returns
 kovariancia <- cov(returns)
