@@ -41,9 +41,12 @@ learningData <- fullData[1:learningLines, ]
 validationData <- fullData[learningLines+1:allLines, ]
 
 # THE OPTIMAL PORTFOLIO SELECTION ##############################################
-#Get the Covariance matrix for the learning data only
+#Get the Covariance matrix for the learning data
 Dmat <- matrix(cov(learningData), nrow = nStock, ncol = nStock)
 #Dmat
+
+#Get the Covariance matrix for the test data
+Validmat <- matrix(cov(validationData), nrow = nStock, ncol = nStock)
 
 # Coeff vector for linear part
 dvec <- matrix(rep(0.0, nStock), nrow = nStock, ncol = 1)
@@ -58,14 +61,50 @@ Amat <- cbind(A.Equality, diag(nStock), -diag(nStock))
 bvec <- c(1, rep(0, nStock), rep(-1.0, nStock))
 bvec
 
-# Solv for optimal portfolio
+# Solv for optimal portfolio on the training data
 qp <- solve.QP(Dmat, dvec, Amat, bvec, meq=1)
 optimalWeights <- qp$solution
 optimalWeights
 
+# Solv for optimal portfolio on the validation data
+qp <- solve.QP(Validmat, dvec, Amat, bvec, meq=1)
+optimalWeights_validation <- qp$solution
+optimalWeights_validation
+
 # Equal weight portfolio for benchmarking
 equalWeights <- matrix(rep(1/nStock, nStock), nrow = nStock, ncol = 1)
 equalWeights
+
+
+# Calculating the predicted, the optimal and equal weighted portfolio
+
+validationData <- validationData %>% as.tibble %>%
+  mutate(portfolio = GE * optimalWeights_training[1] + JPM * optimalWeights_training[2] +
+           BA * optimalWeights_training[3] + AAPL * optimalWeights_training[4] + JNJ * optimalWeights_training[5]) %>%
+  mutate(portfolio_ideal = GE * optimalWeights_validation[1] + JPM * optimalWeights_validation[2] +
+           BA * optimalWeights_validation[3] + AAPL * optimalWeights_validation[4] + JNJ * optimalWeights_validation[5]) %>%
+  mutate(portfolio_equal = GE * equalWeights[1] + JPM * equalWeights[2] + BA * equalWeights[3] + AAPL * equalWeights[4] + JNJ * equalWeights[5])
+
+# Mean and variance of the stocks and portfolios
+
+risks <- sapply(validationData, var)
+meanreturn <- sapply(validationData, mean)
+
+results <- data.frame("Stock" = c("GE", "JPM", "BA", "AAPL", "JNJ", "portfolio", "portfolio_ideal", "portfolio_equal"), "Mean" = mean_return, "Risk" = risks)
+
+# Check if the predicted portfolio performanced better than the equal weighted portfolio
+
+view(results)
+
+# While the risk of the predicted portfolio is lower than the equal weighted's risk, the return is far lower
+# The optimal portfolio outperforms the predicted, but for risk-tolerant investors the equal weighted portfolio is effective
+
+portf_error <- MSE(y_pred = validationData$portfolio, y_true = validationData$portfolio_ideal)
+
+portf_equal_error <- MSE(y_pred = validationData$portfolio_equal, y_true = validationData$portfolio_ideal)
+
+portf_error < portf_equal_error # Is the MSE of the predicted portfolio lower?
+
 
 
 
