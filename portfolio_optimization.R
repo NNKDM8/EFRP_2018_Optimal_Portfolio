@@ -51,6 +51,9 @@ Dmat <- matrix(cov(learningData), nrow = nStock, ncol = nStock)
 #Get the Covariance matrix for the test data
 Validmat <- matrix(cov(validationData), nrow = nStock, ncol = nStock)
 
+#Get the Covariance matrix for the full data
+Validmat <- matrix(cov(fullData), nrow = nStock, ncol = nStock)
+
 # Coeff vector for linear part
 dvec <- matrix(rep(0.0, nStock), nrow = nStock, ncol = 1)
 #dvec
@@ -74,6 +77,16 @@ qp <- solve.QP(Validmat, dvec, Amat, bvec, meq=1)
 optimalWeights_validation <- qp$solution
 optimalWeights_validation
 
+# Solv for optimal portfolio on the full data
+qp <- solve.QP(fullMat, dvec, Amat, bvec, meq=1)
+optimalWeights_full <- qp$solution
+optimalWeights_full
+
+#Random weight
+rand <- runif(5)
+randWeights <- rand/sum(rand)
+randWeights
+
 # Equal weight portfolio for benchmarking
 equalWeights <- matrix(rep(1/nStock, nStock), nrow = nStock, ncol = 1)
 equalWeights
@@ -86,14 +99,17 @@ validationData <- validationData %>% as.tibble %>%
            BA * optimalWeights_training[3] + AAPL * optimalWeights_training[4] + JNJ * optimalWeights_training[5]) %>%
   mutate(portfolio_ideal = GE * optimalWeights_validation[1] + JPM * optimalWeights_validation[2] +
            BA * optimalWeights_validation[3] + AAPL * optimalWeights_validation[4] + JNJ * optimalWeights_validation[5]) %>%
-  mutate(portfolio_equal = GE * equalWeights[1] + JPM * equalWeights[2] + BA * equalWeights[3] + AAPL * equalWeights[4] + JNJ * equalWeights[5])
+  mutate(portfolio_equal = GE * equalWeights[1] + JPM * equalWeights[2] + BA * equalWeights[3] + AAPL * equalWeights[4] + JNJ * equalWeights[5]) %>%
+  mutate(portfolio_full = GE * optimalWeights_full[1] + JPM * optimalWeights_full[2] + BA * optimalWeights_full[3] + 
+           AAPL * optimalWeights_full[4] + JNJ * optimalWeights_full[5]) %>%
+  mutate(portfolio_random = GE * randWeights[1] + JPM * randWeights[2] + BA * randWeights[3] + AAPL * randWeights[4] + JNJ * randWeights[5])
 
 # Mean and variance of the stocks and portfolios
 
 risks <- sapply(validationData, var)
 mean_return <- sapply(validationData, mean)
 
-results <- data.frame("Stock" = c("GE", "JPM", "BA", "AAPL", "JNJ", "portfolio", "portfolio_ideal", "portfolio_equal"), "Mean" = mean_return, "Risk" = risks)
+results <- data.frame("Stock" = c("GE", "JPM", "BA", "AAPL", "JNJ", "portfolio", "portfolio_ideal", "portfolio_equal", "portfolio_full", "portfolio_random"), "Mean" = mean_return, "Risk" = risks)
 
 # Check if the predicted portfolio performanced better than the equal weighted portfolio
 
@@ -107,7 +123,5 @@ portf_error <- MSE(y_pred = validationData$portfolio, y_true = validationData$po
 portf_equal_error <- MSE(y_pred = validationData$portfolio_equal, y_true = validationData$portfolio_ideal)
 
 portf_error < portf_equal_error # Is the MSE of the predicted portfolio lower?
-
-
 
 
