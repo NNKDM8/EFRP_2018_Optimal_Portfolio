@@ -1,0 +1,53 @@
+presentation
+========================================================
+author: 
+date: 
+autosize: true
+
+Objectives
+========================================================
+Our main goal was to implement an R script which is able to
+- Download time series data from Yahoo Finance
+- Preprocess the data for further analisys
+- Calculate the covariance matrix
+- Deterime and optimal portfolio (metrics?) from the data
+- Benchmark this to an uneducated guess (e.g. equal weight portfolio)
+
+
+Data source and downloading
+========================================================
+...
+
+Preporcessing and covariance matrix
+========================================================
+...
+
+Optimal portfolio
+========================================================
+- Optimal portfolio theory (Constrained quadratic optimization)
+$$
+\sigma_p^2 = w^T \Sigma w
+$$
+$$
+0 \leq w_i \leq 1
+$$
+$$
+1 \cdot w = 1
+$$
+
+- Minimizing the portfolio variance
+$$
+min(\sigma_p^2)
+$$
+
+Quadprog package
+========================================================
+- Straightforward interface
+- LGPL license
+- Can handle equality and inequality constraints
+- Suitable for small scale usage
+- [CRAN Source](https://cran.r-project.org/web/packages/quadprog/index.html)
+
+Out of sample testing
+========================================================
+...
