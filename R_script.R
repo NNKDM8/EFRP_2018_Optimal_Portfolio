@@ -5,6 +5,10 @@ library(pdfetch)
 #install.packages("quadprog")
 library(quadprog)
 
+# GLOBAL PARAMETERS
+# Fraction of data used for learning
+learningFraction <- 0.7
+
 #Select and download 5 US stocks from separate indicies //financial/healthcare/services/tech/consumer goods
 GE <- pdfetch_YAHOO("GE", from = "2013-01-01", to = "2018-10-14")
 JPM <- pdfetch_YAHOO("JPM", from = "2013-01-01", to = "2018-10-14")
@@ -23,10 +27,18 @@ rawFullData <- data.frame(
 #Drop the missing values
 fullData <- drop_na(rawFullData)
 
-learningSize <- nrow(fullData)
+# Partition the data
+allLines <- nrow(fullData)
+#learningLines <- floor(nrow(fullData) * learningFraction)
+learningLines <- floor(allLines * learningFraction)
+learningLines
+
+learningData <- fullData[1:learningLines, ]
+validationData <- fullData[learningLines+1:allLines, ]
 
 #Get the Covariance matrix of these returns
-kovariancia <- cov(returns)
+#kovariancia <- cov(returns)
+kovariancia <- cov(learningData)
 
 kovariancia
 
@@ -58,15 +70,5 @@ bvec
 qp <- solve.QP(Dmat, dvec, Amat, bvec, meq=1)
 qp$solution
 
-## Two time the covariance matrx
-#Dmat <- 2*matrix(c(1,-1/2,-1/2,1), nrow = 2, byrow=TRUE)
-#
-## Linear part (have to be zero)
-#dvec <- c(0, 0)
-#Amat    <- diag(2)
-#bvec <- c(0, 0)
-#sol  <- solve.QP(Dmat, dvec, Amat, bvec, meq=0)
-#sol
-#
 
 
