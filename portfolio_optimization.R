@@ -4,6 +4,9 @@ library(tidyverse)
 library(pdfetch)
 #install.packages("quadprog")
 library(quadprog)
+#install.packages("MLmetrics")
+library(MLmetrics)
+library(utils)
 
 # GLOBAL PARAMETERS
 # Fraction of data used for learning
@@ -38,7 +41,7 @@ learningLines <- floor(allLines * learningFraction)
 learningData <- fullData[1:learningLines, ]
 
 # Out of sample data to test on
-validationData <- fullData[learningLines+1:allLines, ]
+validationData <- fullData[(learningLines+1):allLines, ]
 
 # THE OPTIMAL PORTFOLIO SELECTION ##############################################
 #Get the Covariance matrix for the learning data
@@ -63,8 +66,8 @@ bvec
 
 # Solv for optimal portfolio on the training data
 qp <- solve.QP(Dmat, dvec, Amat, bvec, meq=1)
-optimalWeights <- qp$solution
-optimalWeights
+optimalWeights_training <- qp$solution
+optimalWeights_training
 
 # Solv for optimal portfolio on the validation data
 qp <- solve.QP(Validmat, dvec, Amat, bvec, meq=1)
@@ -88,13 +91,13 @@ validationData <- validationData %>% as.tibble %>%
 # Mean and variance of the stocks and portfolios
 
 risks <- sapply(validationData, var)
-meanreturn <- sapply(validationData, mean)
+mean_return <- sapply(validationData, mean)
 
 results <- data.frame("Stock" = c("GE", "JPM", "BA", "AAPL", "JNJ", "portfolio", "portfolio_ideal", "portfolio_equal"), "Mean" = mean_return, "Risk" = risks)
 
 # Check if the predicted portfolio performanced better than the equal weighted portfolio
 
-view(results)
+results
 
 # While the risk of the predicted portfolio is lower than the equal weighted's risk, the return is far lower
 # The optimal portfolio outperforms the predicted, but for risk-tolerant investors the equal weighted portfolio is effective
