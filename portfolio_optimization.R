@@ -14,26 +14,24 @@ nStock <- 5
 
 # GET DATA AND PREPROCESS ##############################################
 #Select and download 5 US stocks from separate indicies //financial/healthcare/services/tech/consumer goods
-GE <- pdfetch_YAHOO("GE", from = "2013-01-01", to = "2018-10-14")
-JPM <- pdfetch_YAHOO("JPM", from = "2013-01-01", to = "2018-10-14")
-BA <- pdfetch_YAHOO("BA", from = "2013-01-01", to = "2018-10-14")
-AAPL <- pdfetch_YAHOO("AAPL", from = "2013-01-01", to = "2018-10-14")
-JNJ <- pdfetch_YAHOO("JNJ", from = "2013-01-01", to = "2018-10-14")
+GE <- pdfetch_YAHOO("GE", from = "2013-01-01", to = "2018-10-14", fields = "adjclose")
+JPM <- pdfetch_YAHOO("JPM", from = "2013-01-01", to = "2018-10-14", fields = "adjclose")
+BA <- pdfetch_YAHOO("BA", from = "2013-01-01", to = "2018-10-14", fields = "adjclose")
+AAPL <- pdfetch_YAHOO("AAPL", from = "2013-01-01", to = "2018-10-14", fields = "adjclose")
+JNJ <- pdfetch_YAHOO("JNJ", from = "2013-01-01", to = "2018-10-14", fields = "adjclose")
   
 #Logdiff adjusted cloe for yileds
-rawFullData <- data.frame(
-  diff(log(GE$GE.adjclose)), 
-  diff(log(JPM$JPM.adjclose)), 
-  diff(log(BA$BA.adjclose)), 
-  diff(log(AAPL$AAPL.adjclose)), 
-  diff(log(JNJ$JNJ.adjclose)))
+df <- data.frame(GE, JPM, BA, AAPL, JNJ)
+fun <- function(x) {
+  as.matrix(diff(log (x)))
+}
 
-#Drop the missing values
-fullData <- drop_na(rawFullData)
+fullData <- sapply(df, fun)
 
 # Partition the data
 allLines <- nrow(fullData)
 learningLines <- floor(allLines * learningFraction)
+
 #learningLines
 
 # In sample data to train on
