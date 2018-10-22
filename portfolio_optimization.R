@@ -7,6 +7,14 @@ library(quadprog)
 #install.packages("MLmetrics")
 library(MLmetrics)
 library(utils)
+library(ggplot2)
+#install.packages("ggplot2")
+library('reshape2')
+#install.packages("reshape2")
+library(RColorBrewer)
+#install.packages("RColorBrewer")
+library(PerformanceAnalytics)
+#install.packages("PerformanceAnalytics")
 
 # GLOBAL PARAMETERS
 # Fraction of data used for learning
@@ -83,8 +91,8 @@ optimalWeights_full <- qp$solution
 optimalWeights_full
 
 #Random weight
-set.seed(1)
 rand <- runif(5)
+set.seed(3)
 randWeights <- rand/sum(rand)
 randWeights
 
@@ -94,13 +102,16 @@ equalWeights
 
 
 # Calculating the predicted, the optimal and equal weighted portfolio
-validationData <- validationData %>% as.tibble %>%
-  mutate(portfolio = rowSums(t(t(validationData) * optimalWeights_training))) %>%
-  mutate(portfolio_ideal = rowSums(t(t(validationData) * optimalWeights_validation))) %>%
-  mutate(portfolio_equal = rowSums(t(t(validationData) * as.vector(equalWeights)))) %>%
-  mutate(portfolio_full = rowSums(t(t(validationData) * optimalWeights_full))) %>%
-  mutate(portfolio_random = rowSums(t(t(validationData) * randWeights)))
 
+validationData <- validationData %>% as.tibble %>%
+  mutate(portfolio = GE * optimalWeights_training[1] + JPM * optimalWeights_training[2] +
+           BA * optimalWeights_training[3] + AAPL * optimalWeights_training[4] + JNJ * optimalWeights_training[5]) %>%
+  mutate(portfolio_ideal = GE * optimalWeights_validation[1] + JPM * optimalWeights_validation[2] +
+           BA * optimalWeights_validation[3] + AAPL * optimalWeights_validation[4] + JNJ * optimalWeights_validation[5]) %>%
+  mutate(portfolio_equal = GE * equalWeights[1] + JPM * equalWeights[2] + BA * equalWeights[3] + AAPL * equalWeights[4] + JNJ * equalWeights[5]) %>%
+  mutate(portfolio_full = GE * optimalWeights_full[1] + JPM * optimalWeights_full[2] + BA * optimalWeights_full[3] + 
+           AAPL * optimalWeights_full[4] + JNJ * optimalWeights_full[5]) %>%
+  mutate(portfolio_random = GE * randWeights[1] + JPM * randWeights[2] + BA * randWeights[3] + AAPL * randWeights[4] + JNJ * randWeights[5])
 
 # Mean and variance of the stocks and portfolios
 
@@ -109,7 +120,7 @@ mean_return <- sapply(validationData, mean)
 
 results <- data.frame("Stock" = c("GE", "JPM", "BA", "AAPL", "JNJ", "portfolio", "portfolio_ideal", "portfolio_equal", "portfolio_full", "portfolio_random"), "Mean" = mean_return, "Risk" = risks)
 
-# Check if the predicted portfolio performanced better than the equal weighted portfolio
+# Check if the predicted portfolio performed better than the equal weighted portfolio
 
 results
 
@@ -122,3 +133,60 @@ portf_equal_error <- MSE(y_pred = validationData$portfolio_equal, y_true = valid
 
 portf_error < portf_equal_error # Is the MSE of the predicted portfolio lower?
 
+####plotting
+
+# Covariance matrix
+
+colnames(fullMat)<-c("GE", "JPM", "BA", "AAPL", "JNJ")
+rownames(fullMat)<-c("GE", "JPM", "BA", "AAPL", "JNJ")
+
+FullCov<- melt(fullMat,id="id")
+colors<-brewer.pal(11,"RdBu")
+
+ggplot(FullCov, aes(x=FullCov$Var1, y=FullCov$Var2, fill=FullCov$value)) + 
+    geom_tile() + 
+    geom_text(aes(label=round(value,8),color=factor(sign(value))))+
+    scale_x_discrete(expand=c(0,0))+scale_y_discrete(expand=c(0,0))+
+    labs(x="Stocks",y="Stocks")+
+    scale_fill_gradient2(low=colors[10],mid=colors[6],high=colors[2],
+                       midpoint=0, 
+                       limits=c(min(FullCov$value),max(FullCov$value)),name="Covariance")+
+    scale_color_manual(guide="none",values=c("black","blue"))+
+    coord_fixed()
+
+#Correlation chart using 'PerformanceAnalytics' package's built in function
+chart.Correlation(fullData)
+
+# fictional investor's money through the examined period with different strategies
+cap<-10000
+
+#creating rsults data frame
+ValdataRows<-nrow(validationData)
+valdataValues<-data.frame( portfVal=numeric(ValdataRows),portfidealVal=numeric(ValdataRows),
+                          portfEqVal=numeric(ValdataRows),portfFullVal=numeric(ValdataRows),
+                          portfRandVal=numeric(ValdataRows), stringsAsFactors=FALSE)
+
+#determining initial capital
+for (i in colnames(valdataValues)){
+  valdataValues[1,i]<-cap
+}
+
+#filling up the data frame
+for (i in 2:nrow(validationData)) {
+    valdataValues$portfVal[i]<-(1+validationData$portfolio[i])*valdataValues$portfVal[i-1]
+    valdataValues$portfidealVal[i]<-(1+validationData$portfolio_ideal[i])*valdataValues$portfidealVal[i-1]
+    valdataValues$portfEqVal[i]<-(1+validationData$portfolio_equal[i])*valdataValues$portfEqVal[i-1]
+    valdataValues$portfFullVal[i]<-(1+validationData$portfolio_full[i])*valdataValues$portfFullVal[i-1]
+    valdataValues$portfRandVal[i]<-(1+validationData$portfolio_random[i])*valdataValues$portfRandVal[i-1]
+    }
+
+#binding days to data frame
+valdataValues<-cbind(days=c(1:nrow(valdataValues)),valdataValues)
+
+#plotting portfolio values
+ggplot(valdataValues, aes(valdataValues$days)) + 
+  geom_line(aes(y = valdataValues$portfVal, colour = "Portfolio")) + 
+  geom_line(aes(y = valdataValues$portfidealVal, colour = "Ideal")) +
+  geom_line(aes(y = valdataValues$portfEqVal, colour = "Equal")) +
+  geom_line(aes(y = valdataValues$portfFullVal, colour = "Full")) +
+  geom_line(aes(y = valdataValues$portfRandVal, colour = "Random"))
