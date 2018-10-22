@@ -83,6 +83,7 @@ optimalWeights_full <- qp$solution
 optimalWeights_full
 
 #Random weight
+set.seed(1)
 rand <- runif(5)
 randWeights <- rand/sum(rand)
 randWeights
@@ -93,16 +94,13 @@ equalWeights
 
 
 # Calculating the predicted, the optimal and equal weighted portfolio
-
 validationData <- validationData %>% as.tibble %>%
-  mutate(portfolio = GE * optimalWeights_training[1] + JPM * optimalWeights_training[2] +
-           BA * optimalWeights_training[3] + AAPL * optimalWeights_training[4] + JNJ * optimalWeights_training[5]) %>%
-  mutate(portfolio_ideal = GE * optimalWeights_validation[1] + JPM * optimalWeights_validation[2] +
-           BA * optimalWeights_validation[3] + AAPL * optimalWeights_validation[4] + JNJ * optimalWeights_validation[5]) %>%
-  mutate(portfolio_equal = GE * equalWeights[1] + JPM * equalWeights[2] + BA * equalWeights[3] + AAPL * equalWeights[4] + JNJ * equalWeights[5]) %>%
-  mutate(portfolio_full = GE * optimalWeights_full[1] + JPM * optimalWeights_full[2] + BA * optimalWeights_full[3] + 
-           AAPL * optimalWeights_full[4] + JNJ * optimalWeights_full[5]) %>%
-  mutate(portfolio_random = GE * randWeights[1] + JPM * randWeights[2] + BA * randWeights[3] + AAPL * randWeights[4] + JNJ * randWeights[5])
+  mutate(portfolio = rowSums(t(t(validationData) * optimalWeights_training))) %>%
+  mutate(portfolio_ideal = rowSums(t(t(validationData) * optimalWeights_validation))) %>%
+  mutate(portfolio_equal = rowSums(t(t(validationData) * as.vector(equalWeights)))) %>%
+  mutate(portfolio_full = rowSums(t(t(validationData) * optimalWeights_full))) %>%
+  mutate(portfolio_random = rowSums(t(t(validationData) * randWeights)))
+
 
 # Mean and variance of the stocks and portfolios
 
@@ -124,6 +122,3 @@ portf_equal_error <- MSE(y_pred = validationData$portfolio_equal, y_true = valid
 
 portf_error < portf_equal_error # Is the MSE of the predicted portfolio lower?
 
-
-
-data.frame(a = c())
