@@ -52,7 +52,7 @@ Dmat <- matrix(cov(learningData), nrow = nStock, ncol = nStock)
 Validmat <- matrix(cov(validationData), nrow = nStock, ncol = nStock)
 
 #Get the Covariance matrix for the full data
-Validmat <- matrix(cov(fullData), nrow = nStock, ncol = nStock)
+fullMat <- matrix(cov(fullData), nrow = nStock, ncol = nStock)
 
 # Coeff vector for linear part
 dvec <- matrix(rep(0.0, nStock), nrow = nStock, ncol = 1)
@@ -125,3 +125,5 @@ portf_equal_error <- MSE(y_pred = validationData$portfolio_equal, y_true = valid
 portf_error < portf_equal_error # Is the MSE of the predicted portfolio lower?
 
 
+
+data.frame(a = c())
