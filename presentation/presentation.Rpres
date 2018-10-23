@@ -94,4 +94,8 @@ Out of sample testing
 
 Visualization, results
 ========================================================
-...
+- Creating covariance matrix using ggplot2 and reshape packages
+
+- Crating correlation matrix using PerformanceAnalytics package
+
+- Visualizing different portfolio values (equal, optimal, etc)
