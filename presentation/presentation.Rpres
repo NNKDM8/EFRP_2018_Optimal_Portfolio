@@ -1,4 +1,4 @@
-presentation
+Presentation: The optimization of a portfolio of US stocks
 ========================================================
 author: 
 date: 
@@ -7,11 +7,26 @@ autosize: true
 Objectives
 ========================================================
 Our main goal was to implement an R script which is able to
+
 - Download time series data from Yahoo Finance
+
 - Preprocess the data for further analisys
+
 - Calculate the covariance matrix
-- Deterime and optimal portfolio (metrics?) from the data
+
+- Determine an optimal portfolio (metrics?) from the data
+
 - Benchmark this to an uneducated guess (e.g. equal weight portfolio)
+
+Theory
+========================================================
+-Markowitz portfolio theory
+
+-Risk-expected return space
+
+-[Efficient frontier](https://en.wikipedia.org/wiki/Modern_portfolio_theory#/media/File:Markowitz_frontier.jpg) (if no risk-free asset is available)
+
+-CAL
 
 
 Data source and downloading
@@ -25,6 +40,7 @@ Preporcessing and covariance matrix
 Optimal portfolio
 ========================================================
 - Optimal portfolio theory (Constrained quadratic optimization)
+
 $$
 \sigma_p^2 = w^T \Sigma w
 $$
@@ -36,6 +52,7 @@ $$
 $$
 
 - Minimizing the portfolio variance
+
 $$
 min(\sigma_p^2)
 $$
@@ -43,11 +60,20 @@ $$
 Quadprog package
 ========================================================
 - Straightforward interface
+
 - LGPL license
+
 - Can handle equality and inequality constraints
+
 - Suitable for small scale usage
+
 - [CRAN Source](https://cran.r-project.org/web/packages/quadprog/index.html)
 
 Out of sample testing
+========================================================
+...
+
+
+Visualization, results
 ========================================================
 ...
