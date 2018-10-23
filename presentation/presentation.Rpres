@@ -43,7 +43,12 @@ Data source and downloading
 
 Preporcessing and covariance matrix
 ========================================================
-...
+
+- Get the logreturns of the stocks
+
+- Drop missing data
+
+- Calculating the covariance matrix
 
 Optimal portfolio
 ========================================================
