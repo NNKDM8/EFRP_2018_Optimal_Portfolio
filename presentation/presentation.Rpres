@@ -31,7 +31,15 @@ Theory
 
 Data source and downloading
 ========================================================
-...
+- From YAHOO finance
+
+- Select from industrial (GE) /finance (JPM) /industrial (BA) /tech (APPL) /healthcare (JNJ)
+
+- Use the pdfetch package
+
+- From 2013-01-01 to 2018-10-14
+
+- Filter to adjusted closing price
 
 Preporcessing and covariance matrix
 ========================================================
@@ -71,8 +79,13 @@ Quadprog package
 
 Out of sample testing
 ========================================================
-...
+- Yields per days with different weights
 
+- Benchmarks: **training** - validation, equal, full data, random
+
+- Results table with Means and Variance
+
+- Check the Portfolio and Equal-Portfolio MSE
 
 Visualization, results
 ========================================================
