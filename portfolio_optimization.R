@@ -31,7 +31,7 @@ BA <- pdfetch_YAHOO("BA", from = "2013-01-01", to = "2018-10-14", fields = "adjc
 AAPL <- pdfetch_YAHOO("AAPL", from = "2013-01-01", to = "2018-10-14", fields = "adjclose")
 JNJ <- pdfetch_YAHOO("JNJ", from = "2013-01-01", to = "2018-10-14", fields = "adjclose")
   
-#Logdiff adjusted cloe for yileds
+#Logdiff adjusted close for yields
 df <- data.frame(GE, JPM, BA, AAPL, JNJ)
 fun <- function(x) {
   as.matrix(diff(log (x)))
