@@ -23,7 +23,7 @@ learningFraction <- 0.7
 # Number of stocks used 
 nStock <- 5
 
-# GET DATA AND PREPROCESS ##############################################
+# GET DATA AND PREPROCESS ############################################## gittest
 #Select and download 5 US stocks from separate indicies //financial/healthcare/services/tech/consumer goods
 GE <- pdfetch_YAHOO("GE", from = "2013-01-01", to = "2018-10-14", fields = "adjclose")
 JPM <- pdfetch_YAHOO("JPM", from = "2013-01-01", to = "2018-10-14", fields = "adjclose")
